@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "peakrdl-rawheader"
+dynamic = ["version"]
+requires-python = ">=3.7"
+dependencies = [
+    "systemrdl-compiler >= 1.29.0, < 2",
+    "jinja2",
+]
+
+authors = [
+    {name="Michael Rogenmoser"},
+]
+description = "Generate Header files from a SystemRDL register model"
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = [
+    "SystemRDL", "PeakRDL", "CSR", "compiler", "tool", "registers", "generator",
+    "C", "header", "software", "SystemVerilog",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+]
+
+[project.optional-dependencies]
+cli = [
+    "peakrdl-cli >= 1.2.3",
+]
+
+[project.urls]
+
+[tool.setuptools.dynamic]
+version = {attr = "peakrdl_rawheader.__about__.__version__"}
+
+[project.entry-points."peakrdl.exporters"]
+raw-header = "peakrdl_rawheader.__peakrdl__:HeaderGeneratorDescriptor"
