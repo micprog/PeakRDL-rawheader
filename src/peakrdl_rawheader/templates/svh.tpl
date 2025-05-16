@@ -9,7 +9,7 @@
 
 % for blk in blocks:
     % for entry in blk:
-`define ${entry["name"]} ${hex(entry["num"])}
+`define ${entry["name"]} ${"64'h{num:08X}".format(num = entry["num"])}
     % endfor
 
 % endfor
