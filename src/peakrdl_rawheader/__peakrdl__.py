@@ -8,8 +8,9 @@
 import os
 from itertools import product
 from peakrdl.plugins.exporter import ExporterSubcommandPlugin
-from systemrdl.node import AddrmapNode, RegNode, MemNode, RegfileNode
+from systemrdl.node import AddrmapNode
 from mako.template import Template
+from peakrdl_rawheader.rawheader_fns import get_regs, get_enums
 
 class HeaderGeneratorDescriptor(ExporterSubcommandPlugin):
     short_desc = "Generate C header with block base addresses and register offsets via Mako"
@@ -64,49 +65,12 @@ class HeaderGeneratorDescriptor(ExporterSubcommandPlugin):
         # Get list for template
         # List consists of blocks that have a list of entries with name (addr, offset, size, or other) and a number
         blocks = get_regs(top_node)
+        enums = get_enums(top_node)
 
-        # for block in blocks:
-        #     print(block)
+        # print(enums)
 
         # Render and write
-        rendered = tmpl.render(top_name=top_name, blocks=blocks, license_str=license_str)
+        rendered = tmpl.render(top_name=top_name, blocks=blocks, license_str=license_str, enums=enums)
         with open(output_path, "w") as f:
             f.write(rendered)
 
-
-def get_regs(node: AddrmapNode, prefix: str = ""):
-    """Recursively get all registers in the addrmap tree."""
-    start_basename = prefix + node.inst_name.upper()
-    nodes = []
-    block = []
-    subblock = []
-    if node.is_array:
-        nodes = node.unrolled()
-    else:
-        nodes = [node]
-
-    for subnode in nodes:
-        basename = start_basename
-        if node.is_array:
-            for idx in subnode.current_idx:
-                basename += "_" + str(idx)
-        if isinstance(subnode, RegNode):
-            subblock.extend([{"name": basename + "_REG_ADDR  ", "num": subnode.absolute_address},
-                             {"name": basename + "_REG_OFFSET", "num": subnode.address_offset}])
-            block = [subblock]
-        elif isinstance(subnode, AddrmapNode) or isinstance(node, RegfileNode):
-            block.append([])
-            block.append([{ "name": basename + "_BASE_ADDR", "num": subnode.absolute_address },
-                          { "name": basename + "_SIZE     ", "num": subnode.total_size }])
-
-            for child in subnode.children():
-                block.extend(get_regs(child, basename + "_"))
-
-        elif isinstance(subnode, MemNode):
-            block.append([])
-            block.append([{"name": basename + "_BASE_ADDR", "num": subnode.absolute_address},
-                          {"name": basename + "_SIZE     ", "num": subnode.total_size}])
-        else:
-            print(f"Unknown node type: {type(node)}")
-
-    return block

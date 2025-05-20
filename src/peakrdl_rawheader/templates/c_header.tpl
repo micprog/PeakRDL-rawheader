@@ -14,4 +14,11 @@
 
 % endfor
 
+% for enum in enums:
+    % for field in enum["choices"]:
+#define ${enum["name"]}__${field["name"]} ${field["value"]}
+    % endfor
+
+% endfor
+
 #endif /* ${top_name.upper() + "_H"} */
